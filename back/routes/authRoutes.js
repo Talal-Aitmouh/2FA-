@@ -7,5 +7,6 @@ const {
 
 router.post("/login", login);
 router.post("/verify", verifyOtp);
+router.post("/register", register); 
 
 module.exports = router;
