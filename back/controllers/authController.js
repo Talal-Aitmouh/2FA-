@@ -45,6 +45,37 @@ exports.login = async (req, res) => {
   });
 };
 
+// 🆕 REGISTER
+exports.register = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields required" });
+  }
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+
+  const secret = speakeasy.generateSecret({
+    name: `MyApp (${email})`
+  });
+
+  const user = await User.create({
+    email,
+    password,
+    secret: secret.base32
+  });
+
+  const qr = await QRCode.toDataURL(secret.otpauth_url);
+
+  res.json({
+    qr
+  });
+};
+
+
 // ✅ VERIFY OTP
 exports.verifyOtp = async (req, res) => {
   const { email, token } = req.body;
