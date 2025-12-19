@@ -45,6 +45,9 @@ export default function Register() {
       setMessage("Invalid OTP");
     }
   };
+  localStorage.setItem("auth", "true");
+navigate("/dashboard");
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
