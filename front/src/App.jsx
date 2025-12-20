@@ -5,9 +5,10 @@ import Register from "./pages/Register";
 
 export default function App() {
 
-  const isAuthenticated = () => {
-  return localStorage.getItem("auth") === "true";
+const isAuthenticated = () => {
+  return !!localStorage.getItem("token");
 };
+
 
   return (
     <BrowserRouter>
@@ -15,11 +16,11 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/dashboard"
-          element={
-            isAuthenticated() ? <Dashboard /> : <Navigate to="/" />
-          }
-        />
+  path="/dashboard"
+  element={
+    isAuthenticated() ? <Dashboard /> : <Navigate to="/" />
+  }
+/>
       </Routes>
       
     </BrowserRouter>
