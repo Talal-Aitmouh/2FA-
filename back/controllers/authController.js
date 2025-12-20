@@ -76,7 +76,10 @@ exports.register = async (req, res) => {
 };
 
 
+const jwt = require("jsonwebtoken");
+
 // ✅ VERIFY OTP
+
 exports.verifyOtp = async (req, res) => {
   const { email, token } = req.body;
 
@@ -96,6 +99,16 @@ exports.verifyOtp = async (req, res) => {
     return res.status(401).json({ message: "Invalid OTP" });
   }
 
-  // هنا مستقبلاً دير JWT
-  res.json({ success: true });
+  // 🔐 GENERATE JWT
+  const jwtToken = jwt.sign(
+    { userId: user._id },
+    "SECRET_KEY",
+    { expiresIn: "1h" }
+  );
+
+  res.json({
+    success: true,
+    token: jwtToken
+  });
 };
+
