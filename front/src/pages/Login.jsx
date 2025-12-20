@@ -49,7 +49,7 @@ export default function Login() {
       });
 
       if (res.data.success) {
-        // 🔐 تخزين JWT
+
         localStorage.setItem("token", res.data.token);
         navigate("/dashboard");
       }
