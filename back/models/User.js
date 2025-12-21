@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   secret: {
-    type: String // كيتزاد غير أول مرة
+    type: String 
   }
 });
 

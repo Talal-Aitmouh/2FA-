@@ -8,7 +8,6 @@ export default function Login() {
     const [otp, setOtp] = useState("");
     const [qr, setQr] = useState("");
     const [step, setStep] = useState("login");
-    // login | qr | otp
     const [message, setMessage] = useState("");
 
     const navigate = useNavigate();

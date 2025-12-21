@@ -2,7 +2,7 @@ const User = require("../models/User");
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
 
-// 🔐 LOGIN (password check + QR or OTP)
+//  LOGIN (password check + QR or OTP)
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -12,17 +12,17 @@ exports.login = async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  // user ما كاينش
+
   if (!user) {
     return res.status(400).json({ message: "User not found" });
   }
 
-  // password غلط
+
   if (user.password !== password) {
     return res.status(401).json({ message: "Invalid password" });
   }
 
-  // 🆕 new user → generate QR
+  //  new user → generate QR
   if (!user.secret) {
     const secret = speakeasy.generateSecret({
       name: `MyApp (${email})`
@@ -45,7 +45,7 @@ exports.login = async (req, res) => {
   });
 };
 
-// 🆕 REGISTER
+//  REGISTER
 exports.register = async (req, res) => {
   const { email, password } = req.body;
 
@@ -78,7 +78,7 @@ exports.register = async (req, res) => {
 
 const jwt = require("jsonwebtoken");
 
-// ✅ VERIFY OTP
+//  VERIFY OTP
 
 exports.verifyOtp = async (req, res) => {
   const { email, token } = req.body;

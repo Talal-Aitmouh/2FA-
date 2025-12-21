@@ -13,7 +13,7 @@ export default function Register() {
 
   const navigate = useNavigate();
 
-  // 🆕 REGISTER
+  //  REGISTER
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
@@ -29,7 +29,7 @@ export default function Register() {
     }
   };
 
-  // ✅ VERIFY OTP
+  //  VERIFY OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
