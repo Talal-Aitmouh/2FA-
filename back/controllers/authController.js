@@ -1,28 +1,46 @@
 const User = require("../models/User");
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
-
+const { hashDevice } = require("../utils/device");
 //  LOGIN (password check + QR or OTP)
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, deviceId } = req.body;
 
-  if (!email || !password) {
+  if (!email || !password || !deviceId) {
     return res.status(400).json({ message: "All fields required" });
   }
 
   const user = await User.findOne({ email });
-
-
   if (!user) {
     return res.status(400).json({ message: "User not found" });
   }
-
 
   if (user.password !== password) {
     return res.status(401).json({ message: "Invalid password" });
   }
 
-  //  new user → generate QR
+  const deviceHash = hashDevice(deviceId);
+
+  // trusted device → direct login
+  const trusted = user.trustedDevices?.find(
+    d => d.deviceHash === deviceHash
+  );
+
+  if (trusted && user.secret) {
+    const token = jwt.sign(
+      { id: user._id },
+      "SECRET_KEY",
+      { expiresIn: "1h" }
+    );
+
+    return res.json({
+      status: "LOGGED_IN",
+      token,
+      otpRequired: false
+    });
+  }
+
+  // first time user → generate QR
   if (!user.secret) {
     const secret = speakeasy.generateSecret({
       name: `MyApp (${email})`
@@ -35,13 +53,15 @@ exports.login = async (req, res) => {
 
     return res.json({
       status: "NEW_USER",
-      qr
+      qr,
+      otpRequired: true
     });
   }
 
-  // 👤 existing user → OTP only
+  // known user but new device → ask OTP
   return res.json({
-    status: "EXISTING_USER"
+    status: "OTP_REQUIRED",
+    otpRequired: true
   });
 };
 
@@ -81,7 +101,11 @@ const jwt = require("jsonwebtoken");
 //  VERIFY OTP
 
 exports.verifyOtp = async (req, res) => {
-  const { email, token } = req.body;
+  const { email, token, deviceId } = req.body;
+
+  if (!email || !token || !deviceId) {
+    return res.status(400).json({ message: "All fields required" });
+  }
 
   const user = await User.findOne({ email });
   if (!user) {
@@ -99,15 +123,26 @@ exports.verifyOtp = async (req, res) => {
     return res.status(401).json({ message: "Invalid OTP" });
   }
 
-  // 🔐 GENERATE JWT
+  //  trust this device
+  const deviceHash = hashDevice(deviceId);
+
+  const exists = user.trustedDevices.find(
+    d => d.deviceHash === deviceHash
+  );
+
+  if (!exists) {
+    user.trustedDevices.push({ deviceHash });
+    await user.save();
+  }
+
   const jwtToken = jwt.sign(
-    { userId: user._id },
+    { id: user._id },
     "SECRET_KEY",
     { expiresIn: "1h" }
   );
 
   res.json({
-    success: true,
+    status: "LOGGED_IN",
     token: jwtToken
   });
 };
