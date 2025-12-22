@@ -12,7 +12,16 @@ const userSchema = new mongoose.Schema({
   },
   secret: {
     type: String 
-  }
+  },
+
+   trustedDevices: [
+    {
+      deviceHash: String,
+      createdAt: { type: Date, default: Date.now }
+    }
+  ]
+
+
 });
 
 module.exports = mongoose.model("User", userSchema);
